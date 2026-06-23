@@ -1,0 +1,9 @@
+name: packaging-metadata
+version: 1.0.0
+summary: Metadata for Mechanix Contacts app packaging
+applications:
+  - name: contacts
+    folder: .
+    binary: mechanix_contacts
+    description: "Mechanix Contacts application"
+    maintainer: "Yogita Hiray <yogitah@mechasystems.com>"
