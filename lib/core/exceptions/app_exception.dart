@@ -18,3 +18,9 @@ class ContactsStoreInitializationException extends AppException {
     super.message = 'Failed to initialize contacts database.',
   ]);
 }
+
+class DuplicateContactException extends AppException {
+  const DuplicateContactException([
+    super.message = 'A contact with this name and phone number already exists.',
+  ]);
+}

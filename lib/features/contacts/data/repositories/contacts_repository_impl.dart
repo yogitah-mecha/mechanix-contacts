@@ -4,6 +4,7 @@ import 'package:mechanix_contacts/features/contacts/data/models/phone_numbers.da
 import 'package:mechanix_contacts/features/contacts/data/models/sim_card.dart';
 import 'package:mechanix_contacts/features/contacts/services/contacts_store_service.dart';
 import 'package:mechanix_contacts/objectbox.g.dart';
+import 'package:mechanix_contacts/core/exceptions/app_exception.dart';
 import '../../../../core/utils/app_logger.dart';
 import 'contacts_repository.dart';
 
@@ -79,6 +80,45 @@ class ContactsRepositoryImpl implements ContactsRepository {
       await _ensureConnected();
 
       _activeStore.runInTransaction(TxMode.write, () {
+        // Check for duplicates: same name (case-insensitive) and same number (digits only match)
+        final sameNameContacts = _contacts
+            .query(
+              ContactEntity_.name.equals(contact.name, caseSensitive: false),
+            )
+            .build()
+            .find();
+
+        final otherContacts = sameNameContacts
+            .where((c) => c.id != contact.id)
+            .toList();
+
+        if (otherContacts.isNotEmpty) {
+          final otherContactIds = otherContacts.map((c) => c.id).toList();
+          final builder = _phoneNumbers.query();
+
+          builder.link(
+            PhoneNumberEntity_.contact,
+            ContactEntity_.id.oneOf(otherContactIds),
+          );
+
+          final matchingPhoneNumbers = builder.build().find();
+
+          final newNumbersNormalized = numbers
+              .map((n) => n.replaceAll(RegExp(r'\D'), ''))
+              .where((n) => n.isNotEmpty)
+              .toSet();
+
+          for (final existingPhone in matchingPhoneNumbers) {
+            final existingNormalized = existingPhone.number.replaceAll(
+              RegExp(r'\D'),
+              '',
+            );
+            if (newNumbersNormalized.contains(existingNormalized)) {
+              throw const DuplicateContactException();
+            }
+          }
+        }
+
         // If editing, clear existing numbers, emails of this contact first
         if (contact.id != 0) {
           final existingNumbers = _phoneNumbers

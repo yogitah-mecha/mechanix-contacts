@@ -12,4 +12,5 @@ enum ContactsError {
   unknown,
   updateFailed,
   searchFailed,
+  duplicateContact,
 }

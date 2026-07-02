@@ -61,10 +61,12 @@ class ContactFormContent extends StatelessWidget {
               final controller = phoneControllers[index];
 
               return _PhoneField(
+                key: ValueKey(controller),
                 controller: controller,
                 validator: validatePhone,
                 onAdd: onAddPhone,
                 onRemove: () => onRemovePhone(index),
+                isLast: index == phoneControllers.length - 1,
               );
             }),
 
@@ -81,10 +83,12 @@ class ContactFormContent extends StatelessWidget {
               final controller = emailControllers[index];
 
               return _EmailField(
+                key: ValueKey(controller),
                 controller: controller,
                 validator: validateEmail,
                 onAdd: onAddEmail,
                 onRemove: () => onRemoveEmail(index),
+                isLast: index == emailControllers.length - 1,
               );
             }),
           ],
@@ -153,18 +157,19 @@ class _PhoneField extends StatelessWidget {
   final String? Function(String?) validator;
   final VoidCallback onAdd;
   final VoidCallback onRemove;
+  final bool isLast;
 
   const _PhoneField({
+    super.key,
     required this.controller,
     required this.validator,
     required this.onAdd,
     required this.onRemove,
+    required this.isLast,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isEmptyField = controller.text.trim().isEmpty;
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -196,12 +201,12 @@ class _PhoneField extends StatelessWidget {
           const SizedBox(width: 8),
           IconButton(
             icon: Icon(
-              isEmptyField
+              isLast
                   ? Icons.add_circle_outline
                   : Icons.remove_circle_outline,
-              color: isEmptyField ? Colors.blue : Colors.redAccent,
+              color: isLast ? Colors.blue : Colors.redAccent,
             ),
-            onPressed: isEmptyField ? onAdd : onRemove,
+            onPressed: isLast ? onAdd : onRemove,
           ),
         ],
       ),
@@ -214,18 +219,19 @@ class _EmailField extends StatelessWidget {
   final String? Function(String?) validator;
   final VoidCallback onAdd;
   final VoidCallback onRemove;
+  final bool isLast;
 
   const _EmailField({
+    super.key,
     required this.controller,
     required this.validator,
     required this.onAdd,
     required this.onRemove,
+    required this.isLast,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isEmptyField = controller.text.trim().isEmpty;
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -252,12 +258,12 @@ class _EmailField extends StatelessWidget {
           const SizedBox(width: 8),
           IconButton(
             icon: Icon(
-              isEmptyField
+              isLast
                   ? Icons.add_circle_outline
                   : Icons.remove_circle_outline,
-              color: isEmptyField ? Colors.blue : Colors.redAccent,
+              color: isLast ? Colors.blue : Colors.redAccent,
             ),
-            onPressed: isEmptyField ? onAdd : onRemove,
+            onPressed: isLast ? onAdd : onRemove,
           ),
         ],
       ),

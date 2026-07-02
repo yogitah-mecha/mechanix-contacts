@@ -5,6 +5,7 @@ import 'package:mechanix_contacts/features/contacts/blocs/contacts_event.dart';
 import 'package:mechanix_contacts/features/contacts/blocs/contacts_state.dart';
 import 'package:mechanix_contacts/features/contacts/data/models/contacts.dart';
 import 'package:mechanix_contacts/features/contacts/data/repositories/contacts_repository.dart';
+import 'package:mechanix_contacts/core/exceptions/app_exception.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -131,6 +132,29 @@ void main() {
         const ContactsState(
           status: ContactsStatus.error,
           error: ContactsError.saveFailed,
+        ),
+      ],
+    );
+
+    blocTest<ContactsBloc, ContactsState>(
+      'emits [loading, error] with duplicateContact when SaveContact fails with DuplicateContactException',
+      build: () {
+        when(
+          () => mockRepository.save(any(), any(), any()),
+        ).thenThrow(const DuplicateContactException());
+        return bloc;
+      },
+      act: (bloc) => bloc.add(
+        SaveContact(
+          contact: ContactEntity(name: 'Alice'),
+          phoneNumbers: const ['12345'],
+        ),
+      ),
+      expect: () => [
+        const ContactsState(status: ContactsStatus.loading),
+        const ContactsState(
+          status: ContactsStatus.error,
+          error: ContactsError.duplicateContact,
         ),
       ],
     );

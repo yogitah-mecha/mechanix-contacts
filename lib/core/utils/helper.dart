@@ -150,5 +150,8 @@ String getErrorMessage(AppLocalizations l10n, ContactsError error) {
 
     case ContactsError.searchFailed:
       return l10n.failedToSearchContact;
+
+    case ContactsError.duplicateContact:
+      return l10n.contactAlreadyExists;
   }
 }
