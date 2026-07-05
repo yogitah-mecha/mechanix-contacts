@@ -43,7 +43,7 @@ dependencies:
   objectbox: ^5.3.2
   alphabet_list_view: ^1.2.1
   show_fps: ^1.1.0
-  dlibphonenumber: ^1.1.35
+  phone_numbers_parser: ^9.0.24
 
 dev_dependencies:
   flutter_test:

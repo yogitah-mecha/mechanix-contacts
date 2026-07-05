@@ -1,7 +1,6 @@
-import 'dart:io';
 import 'package:mechanix_contacts/core/utils/enums.dart';
 import 'package:mechanix_contacts/l10n/app_localizations.dart';
-import 'package:dlibphonenumber/dlibphonenumber.dart';
+import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 
 String getInitials(String name) {
   if (name.isEmpty) return "";
@@ -85,42 +84,15 @@ String? validatePhoneNumber(AppLocalizations l10n, String? value) {
     return l10n.invalidPhoneNumberFormat;
   }
 
-  // If number of digits is 7 or more, perform validation with dlibphonenumber
-  if (digitsOnly.length >= 7) {
+  // If number of digits is 7 or more and starts with a plus sign, validate using phone_numbers_parser
+  if (digitsOnly.length >= 7 && cleanVal.startsWith('+')) {
     try {
-      final phoneUtil = PhoneNumberUtil.instance;
-      
-      // Determine user's local region based on platform locale (default to 'IN')
-      String defaultRegion = 'IN';
-      try {
-        final locale = Platform.localeName;
-        final parts = locale.split('_');
-        if (parts.length > 1) {
-          final countryPart = parts[1].split('.')[0];
-          if (countryPart.length == 2) {
-            defaultRegion = countryPart.toUpperCase();
-          }
-        }
-      } catch (_) {}
+      final phoneNumber = PhoneNumber.parse(cleanVal);
 
-      // First attempt: parse number as entered (e.g. local/national or already prefixed with +)
-      final phoneNumber = phoneUtil.parse(cleanVal, defaultRegion);
-      bool isValid = phoneUtil.isValidNumber(phoneNumber);
-
-      // Second attempt: if invalid and has no '+' prefix, try prepending '+' (e.g., country code present but no '+')
-      if (!isValid && !cleanVal.startsWith('+')) {
-        try {
-          final intlPhoneNumber = phoneUtil.parse('+$cleanVal', defaultRegion);
-          isValid = phoneUtil.isValidNumber(intlPhoneNumber);
-        } catch (_) {
-          // Fallback to invalid if prepending '+' also fails parsing
-        }
-      }
-
-      if (!isValid) {
+      if (!phoneNumber.isValid()) {
         return l10n.invalidPhoneNumberFormat;
       }
-    } catch (e) {
+    } catch (_) {
       return l10n.invalidPhoneNumberFormat;
     }
   }
